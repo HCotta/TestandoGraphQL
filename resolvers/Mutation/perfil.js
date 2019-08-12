@@ -1,44 +1,47 @@
-const db = require('../../config/db')
-const { perfil: obterPerfil } = require('../Query/perfil')
+const db = require('../../config/db');
+const { perfil: obterPerfil } = require('../Query/perfil');
 
 module.exports = {
-    async novoPerfil(_, { dados }) {
+    async novoPerfil(_, { dados }, context) {
+        context && context.validarAdmin();
         try {
             const [ id ] = await db('perfis')
-                .insert(dados)
+                .insert(dados).returning('id');
             return db('perfis')
-                .where({ id }).first()
+                .where({ id }).first();
         } catch(e) {
-            throw new Error(e.sqlMessage)
+            throw new Error(e.sqlMessage);
         }
     },
-    async excluirPerfil(_, args) {
+    async excluirPerfil(_, args, context) {
+        context && context.validarAdmin();
         try {
-            const perfil = await obterPerfil(_, args)
+            const perfil = await obterPerfil(_, args);
             if(perfil) {
-                const { id } = perfil
+                const { id } = perfil;
                 await db('usuarios_perfis')
-                    .where({ perfil_id: id }).delete()
+                    .where({ perfil_id: id }).delete();
                 await db('perfis')
-                    .where({ id }).delete()
+                    .where({ id }).delete();
             }
-            return perfil
+            return perfil;
         } catch(e) {
-            throw new Error(e.sqlMessage)
+            throw new Error(e.sqlMessage);
         }
     },
-    async alterarPerfil(_, { filtro, dados }) {
+    async alterarPerfil(_, { filtro, dados }, context) {
+        context && context.validarAdmin();
         try {
-            const perfil = await obterPerfil(_, { filtro })
+            const perfil = await obterPerfil(_, { filtro });
             if(perfil) {
-                const { id } = perfil
+                const { id } = perfil;
                 await db('perfis')
                     .where({ id })
-                    .update(dados)
+                    .update(dados);
             }
-            return { ...perfil, ...dados }
+            return { ...perfil, ...dados };
         } catch(e) {
-            throw new Error(e.sqlMessage)
+            throw new Error(e.sqlMessage);
         }
     }
-}
+};

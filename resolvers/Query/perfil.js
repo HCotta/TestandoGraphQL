@@ -1,22 +1,24 @@
 const db = require('../../config/db')
 
 module.exports = {
-    perfis() {
-        return db('perfis')
+    perfis(parent, args, context) {
+        context && context.validarAdmin();    
+        return db('perfis');
     },
-    perfil(_, { filtro }) {
+    perfil(_, { filtro }, context) {
+        context && context.validarAdmin();     
         if(!filtro) return null
-        const { id, nome } = filtro
+        const { id, nome } = filtro;
         if(id) {
             return db('perfis')
                 .where({ id })
-                .first()
+                .first();
         } else if(nome) {
             return db('perfis')
                 .where({ nome })
-                .first()
+                .first();
         } else {
-            return null
+            return null;
         }
     }
 }
